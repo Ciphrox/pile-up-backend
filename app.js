@@ -9,10 +9,13 @@ env.config();
 const app = express();
 app.use(bodyParser.json());
 
-const PORT = process.env.PORT || 3000;
+// Routes
+const authRoute = require('./routes/authRoute');
 
+
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}/`);
+    console.log(`Server is running on http://localhost:${PORT}`);
 
     MONGO_URL = process.env.MONGO_URL;
     mongoose.connect(MONGO_URL);
@@ -26,6 +29,4 @@ app.listen(PORT, () => {
 
 });
 
-app.get('/', (req, res) => {
-    res.send('Hello World');
-});
+app.use('/auth', authRoute);
