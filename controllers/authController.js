@@ -138,7 +138,7 @@ exports.setName = async (req, res) => {
         const user = await User.findOneAndUpdate({ sessionToken }, { name: name }, { new: true });
 
         if (!user) {
-            return res.status(404).send({ message: 'Unauthorized' });
+            return res.status(400).send({ message: 'Invalid sessionToken' });
         }
 
         return res.status(200).send({ message: 'Name set successfully' });
