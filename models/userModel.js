@@ -54,8 +54,8 @@ const userSchema = new mongoose.Schema({
 },
     { timestamps: true }
 );
-userSchema.index({ _id: 1, 'contacts.contactId': 1 }, { unique: true })
 
+userSchema.index({ _id: 1, 'contacts.contactId': 1 }, { unique: true })
 
 const User = mongoose.model('User', userSchema);
 

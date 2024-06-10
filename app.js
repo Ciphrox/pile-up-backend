@@ -13,10 +13,10 @@ app.use(bodyParser.json());
 const authRoute = require('./routes/authRoutes');
 const transactionsRoute = require('./routes/transactionRoutes')
 
-const PORT = process.env.PORT || 3000;
 
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}/`);
+    console.log(`Server is running on http://localhost:${PORT}`);
 
     MONGO_URL = process.env.MONGO_URL;
     mongoose.connect(MONGO_URL);
