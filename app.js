@@ -10,7 +10,8 @@ const app = express();
 app.use(bodyParser.json());
 
 // Routes
-const authRoute = require('./routes/authRoute');
+const authRoute = require('./routes/authRoutes');
+const transactionsRoute = require('./routes/transactionRoutes')
 
 
 const PORT = process.env.PORT || 3000;
@@ -30,3 +31,4 @@ app.listen(PORT, () => {
 });
 
 app.use('/auth', authRoute);
+app.use('/transactions', transactionsRoute);
