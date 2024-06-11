@@ -11,6 +11,7 @@ app.use(bodyParser.json());
 
 // Routes
 const authRoute = require('./routes/authRoutes');
+const userRoute = require('./routes/userRoutes');
 const transactionsRoute = require('./routes/transactionRoutes')
 
 const PORT = process.env.PORT || 3000;
@@ -31,4 +32,5 @@ app.listen(PORT, () => {
 });
 
 app.use('/auth', authRoute);
+app.use('/user', userRoute);
 app.use('/transactions', transactionsRoute);
