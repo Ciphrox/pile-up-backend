@@ -38,7 +38,6 @@ const getNewTransations = async (req, res) => {
             const transaction = await Transaction.findOne({ _id: transactionId });
 
             if (transaction.date > lastTransactionTime) {
-                console.log(transaction)
                 return transaction;
             }
         }));
