@@ -17,10 +17,6 @@ const userSchema = new mongoose.Schema({
             type: Date,
         },
     },
-    sessionToken: {
-        type: String,
-        unique: true
-    },
     netBalance: {
         type: Number,
         default: 0
