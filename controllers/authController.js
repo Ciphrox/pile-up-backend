@@ -1,12 +1,13 @@
 const bcrypt = require('bcryptjs');
 const axios = require('axios');
+const jwt = require('jsonwebtoken');
 
 const User = require('../models/userModel');
 
 const env = require('dotenv');
 env.config();
 
-const { TWO_FACTOR_API } = process.env;
+const { TWO_FACTOR_API, JWT_SECRET } = process.env;
 
 
 
@@ -79,13 +80,12 @@ exports.requestOtp = async (req, res) => {
 
 exports.verifyOtp = async (req, res) => {
     try {
-        if (!req.body.number || !req.body.otp || !req.body.sessionToken) {
+        if (!req.body.number || !req.body.otp) {
             return res.status(400).send({ message: 'Invalid request' });
         }
 
         const number = req.body.number.toString();
         const otp = req.body.otp.toString();
-        const sessionToken = req.body.sessionToken;
 
 
         const user = await User.findOne({ number: number });
@@ -108,43 +108,21 @@ exports.verifyOtp = async (req, res) => {
             return res.status(401).send({ message: 'OTP expired' });
         }
 
-        if (!user.name) {
-            isUserNew = true;
-        }
-
+        const sessionToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '30d' });
 
         user.otp.code = null;
         user.otp.expiresAt = null;
-        user.sessionToken = sessionToken;
-        user.save();
+        await user.save();
 
         if (!user.name) {
-            return res.status(200).send({ message: 'OTP verified successfully', new_user: true });
+            return res.status(200).send({ message: 'OTP verified successfully', sessionToken: sessionToken, new_user: true });
         }
 
-        return res.status(200).send({ message: 'OTP verified successfully', new_user: false });
+        return res.status(200).send({ message: 'OTP verified successfully', sessionToken: sessionToken, new_user: false });
 
     } catch (error) {
         console.log(error);
         return res.status(500).send({ message: 'Internal server error' });
     }
 
-};
-
-exports.setName = async (req, res) => {
-    try {
-        const { name, sessionToken } = req.body;
-
-        const user = await User.findOneAndUpdate({ sessionToken }, { name: name }, { new: true });
-
-        if (!user) {
-            return res.status(400).send({ message: 'Invalid sessionToken' });
-        }
-
-        return res.status(200).send({ message: 'Name set successfully' });
-
-    } catch (error) {
-        console.log(error);
-        return res.status(500).send({ message: 'Internal server error' });
-    }
 };

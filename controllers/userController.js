@@ -1,6 +1,29 @@
 const Transaction = require('../models/transactionModel');
 const { ObjectId } = require('mongoose').Types;
 
+
+exports.setName = async (req, res) => {
+    try {
+        const { name } = req.body;
+        if (!name) {
+            return res.status(400).send({ message: 'Invalid request' });
+        }
+
+        const user = req.user;
+
+        user.name = name;
+        await user.save();
+
+        return res.status(200).send({ message: 'Name set successfully' });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send({ message: 'Internal server error' });
+    }
+};
+
+
+
 exports.handleTransactions = async (req, res) => {
     const transactionId = req.params.transactionId;
 

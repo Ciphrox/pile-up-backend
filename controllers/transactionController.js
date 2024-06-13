@@ -5,23 +5,19 @@ const User = require("../models/userModel");
 const Transaction = require("../models/transactionModel");
 
 exports.createTransaction = async (req, res) => {
-    let session;
     try {
-        if (!req.body.sessionToken) {
-            return res.status(400).send({ message: 'sessionToken Missing' });
-        }
 
         if (!req.body.amount || !req.body.recieverNumber || !req.body.transactionType) {
             return res.status(400).send({ message: 'Incomplete request' });
         }
 
-        const { sessionToken, amount, recieverNumber, transactionType, description } = req.body;
+        const { amount, recieverNumber, transactionType, description } = req.body;
 
 
         session = await mongoose.startSession();
         session.startTransaction();
 
-        const sender = await User.findOne({ sessionToken: sessionToken }).session(session);
+        const sender = req.user
         const reciever = await User.findOne({ number: recieverNumber }).session(session);
 
 
@@ -31,7 +27,7 @@ exports.createTransaction = async (req, res) => {
             return res.status(400).send({ message: 'Invalid request' });
         }
 
-        if (reciever.sessionToken === sessionToken) {
+        if (sender._id.toString() === reciever._id.toString()) {
             await session.abortTransaction();
             await session.endSession();
             return res.status(400).send({ message: 'You cannot send money to yourself' });
@@ -124,8 +120,8 @@ exports.createTransaction = async (req, res) => {
 
 exports.deleteTransaction = async (req, res) => {
     try {
-        const { sessionToken, transactionId } = req.params;
-        if (!sessionToken || !transactionId) {
+        const { transactionId } = req.params;
+        if (!transactionId) {
             return res.status(400).send({ message: 'Incomplete request' });
         }
 
@@ -133,18 +129,11 @@ exports.deleteTransaction = async (req, res) => {
             return res.status(400).send({ message: 'Invalid transactionId' });
         }
 
-
         session = await mongoose.startSession();
         session.startTransaction();
 
 
-        const user = await User.findOne({ sessionToken: sessionToken }).session(session);
-        if (!user) {
-            await session.abortTransaction();
-            await session.endSession();
-            return res.status(400).send({ message: 'Invalid sessionToken' });
-        }
-
+        const user = req.user;
 
         const transaction = await Transaction.findOne({ _id: transactionId }).session(session);
         if (!transaction) {

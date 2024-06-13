@@ -31,6 +31,10 @@ app.listen(PORT, () => {
 
 });
 
+app.get('/', (req, res) => {
+    res.send('Hello World');
+});
+
 app.use('/auth', authRoute);
 app.use('/user', userRoute);
 app.use('/transactions', transactionsRoute);
