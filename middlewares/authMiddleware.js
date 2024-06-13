@@ -7,18 +7,13 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 exports.authMiddleware = async (req, res, next) => {
     try {
-
         const sessionToken = req.headers[ 'sessiontoken' ];
         if (!sessionToken) {
             return res.status(401).send({ message: 'sessionToken Missing' });
         }
 
         try {
-            console.log(sessionToken)
             const decodedToken = jwt.verify(sessionToken, JWT_SECRET);
-            console.log("decodedToken")
-
-
             const user = await User.findOne({ _id: decodedToken.userId });
 
             if (!user) {
