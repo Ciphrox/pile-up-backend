@@ -1,58 +1,56 @@
 const Transaction = require('../models/transactionModel');
 const { ObjectId } = require('mongoose').Types;
 
-
-exports.setName = async (req, res) => {
+// Set user's name
+exports.setName = async (request, reply) => {
     try {
-        const { name } = req.body;
+        const { name } = request.body;
         if (!name) {
-            return res.status(400).send({ message: 'Invalid request' });
+            return reply.status(400).send({ message: 'Invalid request' });
         }
 
-        const user = req.user;
+        const user = request.user;
 
         user.name = name;
         await user.save();
 
-        return res.status(200).send({ message: 'Name set successfully' });
-
+        return reply.status(200).send({ message: 'Name set successfully' });
     } catch (error) {
         console.log(error);
-        return res.status(500).send({ message: 'Internal server error' });
+        return reply.status(500).send({ message: 'Internal server error' });
     }
 };
 
-
-
-exports.handleTransactions = async (req, res) => {
-    const transactionId = req.params.transactionId;
+// Handle transactions
+exports.handleTransactions = async (request, reply) => {
+    const transactionId = request.params.transactionId;
 
     if (transactionId) {
-        return await getNewTransations(req, res);
+        return await getNewTransactions(request, reply);
     }
 
-    return await getAllTransactions(req, res);
-}
+    return await getAllTransactions(request, reply);
+};
 
-const getNewTransations = async (req, res) => {
+// Get new transactions for a contact
+const getNewTransactions = async (request, reply) => {
     try {
-        const user = req.user;
-        const { contactId, transactionId } = req.params;
+        const user = request.user;
+        const { contactId, transactionId } = request.params;
 
         if (!contactId || !transactionId || !ObjectId.isValid(transactionId)) {
-            return res.status(400).send({ message: 'Invalid request' });
+            return reply.status(400).send({ message: 'Invalid request' });
         }
 
         const contact = user.contacts.find(contact => contact.contactId.toString() === contactId);
-        const transaction = await Transaction.findOne({ _id: transactionId })?.select('date').lean();
+        const transaction = await Transaction.findOne({ _id: transactionId }).select('date').lean();
 
         if (!contact) {
-            return res.status(404).send({ message: 'Contact not found' });
+            return reply.status(404).send({ message: 'Contact not found' });
         }
 
         if (!transaction) {
-
-            return res.status(404).send({ message: 'Transaction not found' });
+            return reply.status(404).send({ message: 'Transaction not found' });
         }
 
         const lastTransactionTime = transaction.date;
@@ -67,43 +65,38 @@ const getNewTransations = async (req, res) => {
 
         const newCleanTransactions = newTransactions.filter(transaction => transaction);
 
-        return res.status(200).send(newCleanTransactions);
+        return reply.status(200).send(newCleanTransactions);
     } catch (error) {
         console.log(error);
-        return res.status(500).send({ message: 'Internal server Error' })
+        return reply.status(500).send({ message: 'Internal server Error' });
     }
-}
+};
 
-
-
-
-const getAllTransactions = async (req, res) => {
+// Get all transactions for a contact
+const getAllTransactions = async (request, reply) => {
     try {
-        const user = req.user;
-        const contactId = req.params.contactId;
+        const user = request.user;
+        const { contactId } = request.params;
 
         if (!contactId) {
-            return res.status(400).send({ message: 'Invalid request' });
+            return reply.status(400).send({ message: 'Invalid request' });
         }
 
         const contact = user.contacts.find(contact => contact.contactId.toString() === contactId);
 
         if (!contact) {
-            return res.status(404).send({ message: 'Contact not found' });
+            return reply.status(404).send({ message: 'Contact not found' });
         }
 
         let transactions = contact.transactions;
 
-        transactions = await Promise.all(contact.transactions.map(async (transaction) => {
-            transaction = await Transaction.findOne({ _id: transaction });
-
-            return transaction;
+        transactions = await Promise.all(transactions.map(async (transaction) => {
+            return await Transaction.findOne({ _id: transaction });
         }));
 
-        return res.status(200).send(transactions);
-
+        return reply.status(200).send(transactions);
     } catch (error) {
         console.log(error);
-        return res.status(500).send({ message: 'Internal server error' });
+        return reply.status(500).send({ message: 'Internal server error' });
     }
-}
+};

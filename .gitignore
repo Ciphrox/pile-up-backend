@@ -1,5 +1,9 @@
 node_modules/
+
+# Ignore package-lock.json
 package-lock.json
 
+
+# Ignore environment variable files
 .env
-Pile_UP.code-workspace
+.env*.local

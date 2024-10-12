@@ -1,10 +1,9 @@
-const express = require('express');
-
-const router = express.Router();
+// Import required Fastify plugins
 const { requestOtp, verifyOtp, setName } = require('../controllers/authController');
 
-router.post('/request-otp', requestOtp);
-router.post('/verify-otp', verifyOtp);
+async function authRoutes(fastify, options) {
+    fastify.post('/request-otp', requestOtp);
+    fastify.post('/verify-otp', verifyOtp);
+}
 
-module.exports = router;
-
+module.exports = authRoutes;

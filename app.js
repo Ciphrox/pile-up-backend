@@ -1,40 +1,48 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-
+const fastify = require('fastify');
 const mongoose = require('mongoose');
-
 const env = require('dotenv');
+
+// Load environment variables
 env.config();
 
-const app = express();
-app.use(bodyParser.json());
+// Create Fastify instance
+const app = fastify();
 
-// Routes
+// Load routes
 const authRoute = require('./routes/authRoutes');
 const userRoute = require('./routes/userRoutes');
-const transactionsRoute = require('./routes/transactionRoutes')
+const transactionsRoute = require('./routes/transactionRoutes');
 
+// MongoDB connection
+const MONGO_URL = process.env.MONGO_URL;
 
+if (!MONGO_URL) {
+    throw new Error("MongoDB URL is not defined in the environment variables.");
+}
+
+// Connect to MongoDB
+mongoose.connect(MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => {
+        console.log('MongoDB connected successfully');
+    })
+    .catch(err => {
+        console.error('MongoDB connection error:', err);
+    });
+
+// Register Routes
+app.register(authRoute, { prefix: '/auth' });
+app.register(userRoute, { prefix: '/user' });
+app.register(transactionsRoute, { prefix: '/transactions' });
+
+// Start server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+const HOST = '0.0.0.0';  // Change this to listen on all available network interfaces
 
-    MONGO_URL = process.env.MONGO_URL;
-    mongoose.connect(MONGO_URL);
-    const connection = mongoose.connection;
-    connection.on('error', (err) => {
-        console.log(err);
-    });
-    connection.once('open', () => {
-        console.log('MongoDB database connection established successfully');
-    });
-
+// Use object to specify listen options (host and port)
+app.listen({ port: PORT, host: HOST }, (err, address) => {
+    if (err) {
+        console.error('Error starting the server:', err);
+        process.exit(1);
+    }
+    console.log(`Server is running on ${address}`);
 });
-
-app.get('/', (req, res) => {
-    res.send('Hello World');
-});
-
-app.use('/auth', authRoute);
-app.use('/user', userRoute);
-app.use('/transactions', transactionsRoute);

@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+// Define the schema for transactions
 const transactionSchema = new mongoose.Schema({
     senderId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -11,8 +12,6 @@ const transactionSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
-
-
     amount: {
         type: Number,
         required: true
@@ -27,19 +26,19 @@ const transactionSchema = new mongoose.Schema({
     },
     transactionType: {
         type: String,
-        enum: [ 'request', 'payback' ],
+        enum: ['request', 'payback'],
         required: true
     },
     isApproved: {
         type: Boolean,
         default: false
     }
+});
 
-})
+// Define an index to optimize queries
+transactionSchema.index({ senderId: 1, recieverId: 1, date: -1 });
 
-
-transactionSchema.index({ senderId: 1, receiverId: 1, date: -1 });
-
+// Create the Transaction model
 const Transaction = mongoose.model('Transaction', transactionSchema);
 
 module.exports = Transaction;
