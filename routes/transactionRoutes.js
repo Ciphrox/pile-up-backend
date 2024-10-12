@@ -1,10 +1,13 @@
-const express = require('express');
-
-const router = express.Router();
+// Import required Fastify plugins and middlewares
 const { createTransaction, deleteTransaction } = require('../controllers/transactionController');
 const { authMiddleware } = require('../middlewares/authMiddleware');
 
-router.post('/', authMiddleware, createTransaction);
-router.delete('/:transactionId', authMiddleware, deleteTransaction);
+async function transactionRoutes(fastify, options) {
+    // POST route for creating transactions
+    fastify.post('/', { preHandler: authMiddleware }, createTransaction);
 
-module.exports = router;
+    // DELETE route for deleting transactions
+    fastify.delete('/:transactionId', { preHandler: authMiddleware }, deleteTransaction);
+}
+
+module.exports = transactionRoutes;

@@ -1,16 +1,20 @@
-const express = require(('express'))
-
-const router = express.Router();
-const { authMiddleware } = require('../middlewares/authMiddleware')
+// Import required Fastify plugins and middlewares
+const { authMiddleware } = require('../middlewares/authMiddleware');
 const { getAllContacts, deleteContact } = require("../controllers/contactController");
-const { setName, handleTransactions } = require("../controllers/userController.js");
+const { setName, handleTransactions } = require("../controllers/userController");
 
+async function userRoutes(fastify, options) {
+    // POST route for setting name
+    fastify.post('/set-name', { preHandler: authMiddleware }, setName);
 
-router.post('/set-name', authMiddleware, setName);
-router.get('/contacts', authMiddleware, getAllContacts);
-router.delete('/contacts/:contactId', authMiddleware, deleteContact);
+    // GET route for fetching all contacts
+    fastify.get('/contacts', { preHandler: authMiddleware }, getAllContacts);
 
-router.get('/contacts/transactions/:contactId/:transactionId?', authMiddleware, handleTransactions);
+    // DELETE route for deleting a contact
+    fastify.delete('/contacts/:contactId', { preHandler: authMiddleware }, deleteContact);
 
+    // GET route for handling transactions (with optional transactionId parameter)
+    fastify.get('/contacts/transactions/:contactId/:transactionId?', { preHandler: authMiddleware }, handleTransactions);
+}
 
-module.exports = router;
+module.exports = userRoutes;
