@@ -19,7 +19,7 @@ The app helps users manage money they have lent to others and split expenses dur
 ## Technologies Used
 
 - Node.js
-- Express.js
+- Fastify.js
 - MongoDB
 - Mongoose
 - JWT Authentication
@@ -150,7 +150,7 @@ This project is licensed under the MIT License.
 ## Acknowledgments
 
 - MongoDB for the database.
-- Express.js for the web framework.
+- Fastify.js for the web framework.
 - JWT for authentication and security.
 
 ---
